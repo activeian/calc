@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator Dobândă Întârziere</title>
+    <style>
+        label, input, select, button {
+            display: block;
+            margin-bottom: 10px;
+        }
+        #inputSection {
+            float: left;
+            width: 45%;
+        }
+        #outputSection {
+            float: right;
+            width: 45%;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        input[type="date"] {
+            display: inline-block;
+        }
+        .delete-button {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    
+    <div id="inputSection">
+        <h2>Calculator Dobândă Întârziere</h2>
+        <label for="sumaDatorata">Suma Datorată:</label>
+        <input type="number" id="sumaDatorata">
+
+        <label for="dataScadenta">Data Scadenței:</label>
+        <input type="date" id="dataScadenta">
+
+        <button onclick="adaugaDatorie()">Adaugă Datorie</button>
+
+        <h3>Adaugă Plată</h3>
+        <label for="sumaAchitata">Suma Achitată:</label>
+        <input type="number" id="sumaAchitata">
+
+        <label for="dataAchitarii">Data Achitării:</label>
+        <input type="date" id="dataAchitarii">
+
+        <button onclick="adaugaPlata()">Adaugă Plata</button>
+
+        <label for="stareUrgenta">Exclud perioadele de stare de urgență:</label>
+        <input type="checkbox" id="stareUrgenta">
+
+        <label for="valuta">Valuta:</label>
+        <select id="valuta">
+            <option value="MDL">MDL</option>
+            <option value="USD">USD</option>
+            <option value="EUR">EUR</option>
+            <option value="UAH">UAH</option>
+            <option value="RUB">RUB</option>
+        </select>
+
+        <label for="rataIntarziere">Rata de întârziere peste rata de bază:</label>
+        <select id="rataIntarziere">
+            <option value="0">0%</option>
+            <option value="5">5%</option>
+            <option value="9">9%</option>
+        </select>
+
+        <button onclick="calculeazaDobanda()">Calculează Dobânda</button>
+    </div>
+
+    <div id="outputSection">
+        <h3>Datorii:</h3>
+        <table id="datoriiTable">
+            <tr>
+                <th>Suma</th>
+                <th>Data Scadenței</th>
+                <th>Acțiuni</th>
+            </tr>
+        </table>
+        <h3>Plăți:</h3>
+        <table id="platiTable">
+            <tr>
+                <th>Suma</th>
+                <th>Data Achitării</th>
+                <th>Acțiuni</th>
+            </tr>
+        </table>
+    </div>
+
+    <div id="rezultatDobanzi"></div>
+    <div id="totaluriPerRata"></div>
+
+    <script>
+        const rateDobanzii = [
+            { data: new Date('2024-05-07'), rata: 3.6 },
+            { data: new Date('2024-03-21'), rata: 3.75 },
+            { data: new Date('2024-02-06'), rata: 4.25 },
+            { data: new Date('2023-11-07'), rata: 4.75 },
+            { data: new Date('2023-06-20'), rata: 6 },
+            { data: new Date('2023-05-11'), rata: 10 },
+            { data: new Date('2023-03-20'), rata: 14 },
+            { data: new Date('2023-02-07'), rata: 17 },
+            { data: new Date('2022-12-05'), rata: 20 },
+            { data: new Date('2022-08-04'), rata: 21.5 },
+            { data: new Date('2022-06-03'), rata: 18.5 },
+            { data: new Date('2022-05-05'), rata: 15.5 },
+            { data: new Date('2022-03-16'), rata: 12.5 },
+            { data: new Date('2022-02-15'), rata: 10.5 },
+            { data: new Date('2022-01-13'), rata: 8.5 },
+            { data: new Date('2021-12-03'), rata: 6.5 },
+            { data: new Date('2021-10-05'), rata: 5.5 },
+            { data: new Date('2021-09-06'), rata: 4.65 },
+            { data: new Date('2021-07-30'), rata: 3.65 },
+            { data: new Date('2020-11-06'), rata: 2.65 },
+            { data: new Date('2020-09-09'), rata: 2.75 },
+            { data: new Date('2020-08-06'), rata: 3 },
+            { data: new Date('2020-03-20'), rata: 3.25 },
+            { data: new Date('2020-03-04'), rata: 4.5 },
+            { data: new Date('2019-12-11'), rata: 5.5 },
+            { data: new Date('2019-07-31'), rata: 7.5 },
+            { data: new Date('2019-06-19'), rata: 7 },
+            { data: new Date('2017-05-12'), rata: 6.5 },
+            { data: new Date('2017-10-25'), rata: 7 },
+            { data: new Date('2017-08-28'), rata: 7.5 },
+            { data: new Date('2017-06-28'), rata: 8 },
+            { data: new Date('2016-10-27'), rata: 9 },
+            { data: new Date('2016-09-29'), rata: 9.5 },
+            { data: new Date('2016-07-04'), rata: 10 },
+            { data: new Date('2016-05-26'), rata: 13 },
+            { data: new Date('2016-04-28'), rata: 15 },
+            { data: new Date('2016-03-31'), rata: 17 },
+            { data: new Date('2016-02-25'), rata: 19 },
+            { data: new Date('2015-09-02'), rata: 19.5 },
+            { data: new Date('2015-07-30'), rata: 17.5 },
+            { data: new Date('2015-06-25'), rata: 15.5 },
+            { data: new Date('2015-05-28'), rata: 14.5 },
+            { data: new Date('2015-02-18'), rata: 13.5 },
+            { data: new Date('2015-01-29'), rata: 8.5 },
+            { data: new Date('2014-12-30'), rata: 6.5 },
+            { data: new Date('2014-12-12'), rata: 4.5 },
+            { data: new Date('2013-04-29'), rata: 3.5 },
+            { data: new Date('2012-03-02'), rata: 4.5 },
+            { data: new Date('2012-02-03'), rata: 6.5 },
+            { data: new Date('2012-01-06'), rata: 8.5 },
+            { data: new Date('2011-12-02'), rata: 9.5 },
+            { data: new Date('2011-09-06'), rata: 10 },
+            { data: new Date('2011-08-05'), rata: 9 },
+            { data: new Date('2011-01-07'), rata: 8 },
+            { data: new Date('2010-03-30'), rata: 7 },
+            { data: new Date('2010-02-02'), rata: 6 },
+            { data: new Date('2009-09-08'), rata: 5 },
+            { data: new Date('2009-08-14'), rata: 7 },
+            { data: new Date('2009-07-24'), rata: 9 },
+            { data: new Date('2009-05-15'), rata: 11 },
+            { data: new Date('2009-04-24'), rata: 13 },
+            { data: new Date('2009-03-06'), rata: 14 },
+            { data: new Date('2009-01-16'), rata: 15 },
+            { data: new Date('2008-12-05'), rata: 14 },
+            { data: new Date('2008-09-26'), rata: 15 },
+            { data: new Date('2008-08-01'), rata: 16 },
+            { data: new Date('2008-06-27'), rata: 17 },
+            { data: new Date('2008-05-30'), rata: 18 },
+            { data: new Date('2008-03-28'), rata: 19 },
+            { data: new Date('2008-02-29'), rata: 17.5 },
+            { data: new Date('2008-01-25'), rata: 16 },
+            { data: new Date('2007-12-28'), rata: 14.5 },
+            { data: new Date('2007-10-26'), rata: 13.5 },
+            { data: new Date('2007-09-28'), rata: 12.5 },
+            { data: new Date('2007-07-06'), rata: 11 },
+            { data: new Date('2007-06-08'), rata: 10.5 },
+            { data: new Date('2007-05-11'), rata: 10 },
+            { data: new Date('2007-04-27'), rata: 12 },
+            { data: new Date('2007-01-26'), rata: 14 },
+            { data: new Date('2006-12-29'), rata: 13 },
+            { data: new Date('2006-11-24'), rata: 12.5 },
+            { data: new Date('2006-10-27'), rata: 12 },
+            { data: new Date('2006-07-28'), rata: 14.5 },
+            { data: new Date('2006-06-23'), rata: 15 },
+            { data: new Date('2006-05-26'), rata: 16 },
+            { data: new Date('2006-04-28'), rata: 17 },
+            { data: new Date('2006-03-24'), rata: 18 },
+            { data: new Date('2006-01-27'), rata: 18.5 },
+            { data: new Date('2005-12-30'), rata: 17.5 },
+            { data: new Date('2005-10-28'), rata: 18 },
+            { data: new Date('2005-07-29'), rata: 18.5 },
+            { data: new Date('2005-06-24'), rata: 19 },
+            { data: new Date('2005-04-29'), rata: 20 },
+            { data: new Date('2005-02-25'), rata: 21 },
+            { data: new Date('2004-12-24'), rata: 22 },
+            { data: new Date('2004-10-29'), rata: 20 },
+            { data: new Date('2004-09-24'), rata: 21.5 },
+            { data: new Date('2004-08-27'), rata: 22.5 },
+            { data: new Date('2004-06-25'), rata: 23.5 },
+            { data: new Date('2004-04-30'), rata: 24 },
+            { data: new Date('2004-01-30'), rata: 25 },
+            { data: new Date('2003-10-31'), rata: 26 },
+            { data: new Date('2003-06-27'), rata: 27 },
+            { data: new Date('2003-01-31'), rata: 28 },
+            { data: new Date('2002-08-30'), rata: 29 },
+            { data: new Date('2002-05-31'), rata: 30 },
+            { data: new Date('2002-03-29'), rata: 31 },
+            { data: new Date('2002-01-25'), rata: 32 },
+            { data: new Date('2001-10-26'), rata: 33 },
+            { data: new Date('2001-08-31'), rata: 34 },
+            { data: new Date('2001-07-27'), rata: 35 },
+            { data: new Date('2001-05-25'), rata: 36 },
+            { data: new Date('2001-02-23'), rata: 37 },
+            { data: new Date('2000-12-29'), rata: 38 },
+            { data: new Date('2000-10-27'), rata: 39 },
+            { data: new Date('2000-08-25'), rata: 40 },
+        ];
+
+        let datorii = [];
+        let plati = [];
+
+        function adaugaDatorie() {
+            const sumaDatorata = parseFloat(document.getElementById('sumaDatorata').value);
+            const dataScadenta = new Date(document.getElementById('dataScadenta').value);
+
+            datorii.push({ suma: sumaDatorata, data: dataScadenta });
+            actualizeazaTabel(datorii, 'datoriiTable');
+        }
+
+        function adaugaPlata() {
+            const sumaAchitata = parseFloat(document.getElementById('sumaAchitata').value);
+            const dataAchitarii = new Date(document.getElementById('dataAchitarii').value);
+
+            plati.push({ suma: sumaAchitata, data: dataAchitarii });
+            actualizeazaTabel(plati, 'platiTable');
+        }
+
+        function actualizeazaTabel(lista, tabelId) {
+            const tabel = document.getElementById(tabelId);
+            tabel.innerHTML = '<tr><th>Suma</th><th>Data</th><th>Acțiuni</th></tr>';
+            lista.forEach((item, index) => {
+                const rand = document.createElement('tr');
+                const cellSuma = document.createElement('td');
+                cellSuma.textContent = item.suma.toFixed(2);
+                rand.appendChild(cellSuma);
+
+                const cellData = document.createElement('td');
+                cellData.textContent = item.data.toISOString().split('T')[0];
+                rand.appendChild(cellData);
+
+                const cellActiuni = document.createElement('td');
+                const butonSterge = document.createElement('button');
+                butonSterge.textContent = 'Șterge';
+                butonSterge.className = 'delete-button';
+                butonSterge.onclick = () => {
+                    lista.splice(index, 1);
+                    actualizeazaTabel(lista, tabelId);
+                };
+                cellActiuni.appendChild(butonSterge);
+                rand.appendChild(cellActiuni);
+
+                tabel.appendChild(rand);
+            });
+        }
+
+        function gasesteRata(data) {
+            for (let i = 0; i < rateDobanzii.length; i++) {
+                if (data >= rateDobanzii[i].data) {
+                    return rateDobanzii[i].rata;
+                }
+            }
+            return 0; // Default, in caz ca data e inainte de toate datele din rateDobanzii
+        }
+
+        function esteStareUrgenta(data) {
+            const perioadeStareUrgenta = [
+            { start: new Date('2020-03-15'), end: new Date('2020-05-15') },
+            { start: new Date('2021-04-01'), end: new Date('2021-05-30') }
+            ];
+
+            return perioadeStareUrgenta.some(period => data >= period.start && data <= period.end);
+        }
+
+        function calculeazaDobanda() {
+            const rataIntarziere = parseFloat(document.getElementById('rataIntarziere').value);
+            const stareUrgentaExclusa = document.getElementById('stareUrgenta').checked;
+            const valuta = document.getElementById('valuta').value;
+
+            const dataCurenta = new Date();
+
+            let dobandaTotala = 0;
+            let dobandaPeRata = {};
+            let rezultateDetaliate = [];
+            let totalZile = 0;
+            let totalSumeAchitate = 0;
+            let totalRestanta = 0;
+
+            datorii.forEach(datorie => {
+                let sumaDatorata = datorie.suma;
+                let dataScadenta = datorie.data;
+
+                const platiFiltrate = plati.filter(plata => plata.data >= dataScadenta).sort((a, b) => a.data - b.data);
+
+                let dataStart = new Date(dataScadenta);
+                let sumaRestanta = sumaDatorata;
+
+                for (let i = 0; i <= platiFiltrate.length; i++) {
+                    const dataSfarsit = i < platiFiltrate.length ? platiFiltrate[i].data : dataCurenta;
+                    const plataCurenta = i < platiFiltrate.length ? platiFiltrate[i].suma : 0;
+
+                    let numarZile = 0;
+                    while (dataStart <= dataSfarsit) {
+                        numarZile++;
+                        const rata = gasesteRata(dataStart);
+                        const dobandaZilnica = sumaRestanta * ((rata + rataIntarziere) / 100) / 365;
+
+                        if (!stareUrgentaExclusa || !esteStareUrgenta(dataStart)) {
+                            dobandaTotala += dobandaZilnica;
+                            if (!dobandaPeRata[rata]) {
+                                dobandaPeRata[rata] = 0;
+                            }
+                            dobandaPeRata[rata] += dobandaZilnica;
+
+                            rezultateDetaliate.push({
+                                zi: numarZile,
+                                data: new Date(dataStart),
+                                sumaScadenta: sumaDatorata.toFixed(2),
+                                sumeAchitate: plataCurenta.toFixed(2),
+                                restanta: sumaRestanta.toFixed(2),
+                                rata: rata+rataIntarziere,
+                                dobandaZilnica: dobandaZilnica.toFixed(2),
+                                totalDobanda: dobandaTotala.toFixed(2)
+                            });
+
+                            totalZile++;
+                            totalSumeAchitate += plataCurenta;
+                            totalRestanta += sumaRestanta;
+                        }
+
+                        dataStart.setDate(dataStart.getDate() + 1);
+                    }
+
+                    sumaRestanta -= plataCurenta;
+                    dataStart = new Date(dataSfarsit);
+                }
+            });
+
+            afiseazaRezultate(rezultateDetaliate, dobandaTotala, dobandaPeRata, totalZile, totalSumeAchitate, totalRestanta, valuta);
+        }
+
+        function afiseazaRezultate(rezultateDetaliate, dobandaTotala, dobandaPeRata, totalZile, totalSumeAchitate, totalRestanta, valuta) {
+            let totaluriPerRataHtml = '<h4>Totaluri per rata:</h4><ul>';
+            for (const rata in dobandaPeRata) {
+                totaluriPerRataHtml += `<li>Rata ${rata}%: ${dobandaPeRata[rata].toFixed(2)}</li>`;
+            }
+            totaluriPerRataHtml += '</ul>';
+
+            const nouaFereastra = window.open('', '', 'width=1000,height=800');
+            nouaFereastra.document.write('<html><head><title>Rezultate Dobândă Întârziere</title></head><body>');
+            nouaFereastra.document.write('<h2>Calculul dobânzii de întârziere</h2>');
+            nouaFereastra.document.write(`<p>Dobânda de întârziere constituie – ${dobandaTotala.toFixed(2)} ${valuta} şi a fost calculată pentru perioada ${rezultateDetaliate[0].data.toISOString().split('T')[0]} – ${rezultateDetaliate[rezultateDetaliate.length - 1].data.toISOString().split('T')[0]},</p>`);
+            nouaFereastra.document.write('<p>în temeiul art. 942 alin.2 din CC RM</p>');
+            nouaFereastra.document.write('<table border="1"><tr><th>Zi</th><th>Data</th><th>Suma Scadentă</th><th>Sume Achitate</th><th>Restanța</th><th>Rata de Bază %</th><th>Dobânda Zilnică</th></tr>');
+            
+            rezultateDetaliate.forEach(rezultat => {
+                nouaFereastra.document.write('<tr>');
+                nouaFereastra.document.write(`<td>${rezultat.zi}</td>`);
+                nouaFereastra.document.write(`<td>${rezultat.data.toISOString().split('T')[0]}</td>`);
+                nouaFereastra.document.write(`<td>${rezultat.sumaScadenta}</td>`);
+                nouaFereastra.document.write(`<td>${rezultat.sumeAchitate}</td>`);
+                nouaFereastra.document.write(`<td>${rezultat.restanta}</td>`);
+                nouaFereastra.document.write(`<td>${rezultat.rata}%</td>`);
+                nouaFereastra.document.write(`<td>${rezultat.dobandaZilnica}</td>`);
+                nouaFereastra.document.write('</tr>');
+            });
+
+            nouaFereastra.document.write('<tr>');
+            nouaFereastra.document.write(`<td>Total</td>`);
+            nouaFereastra.document.write(`<td></td>`);
+            nouaFereastra.document.write(`<td></td>`);
+            nouaFereastra.document.write(`<td></td>`);
+            nouaFereastra.document.write(`<td></td>`);
+            nouaFereastra.document.write(`<td></td>`);
+            nouaFereastra.document.write(`<td>${dobandaTotala.toFixed(2)}</td>`);
+            nouaFereastra.document.write('</tr>');
+
+            nouaFereastra.document.write('</table>');
+            nouaFereastra.document.write(totaluriPerRataHtml);
+            nouaFereastra.document.write('</body></html>');
+        }
+
+    </script>
+</body>
+</html>
