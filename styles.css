@@ -1,0 +1,89 @@
+/* Adaugăm fonturi normale :)) */
+body {
+    font-family: 'Arial', sans-serif;
+    background-image: url('https://saitultau.com/imagine_fundal.jpg');
+    background-size: cover;
+}
+
+/* Stilizăm titlurile */
+h2, h3 {
+    color: #333;
+    text-align: center;
+}
+
+/* Stilizăm secțiunile de input și output */
+#inputSection, #outputSection {
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 20px;
+    border-radius: 10px;
+}
+
+/* Stilizăm butoanele */
+button {
+    background-color: #4CAF50; /* Green */
+    border: none;
+    color: white;
+    padding: 10px 20px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+/* Efecte la hover pentru butoane */
+button:hover {
+    background-color: #45a049;
+}
+
+/* Stilizăm tabelele */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+
+th {
+    background-color: #4CAF50;
+    color: white;
+}
+
+/* Stilizăm checkbox-ul */
+input[type="checkbox"] {
+    margin-top: 5px;
+    margin-right: 5px;
+}
+
+/* Stilizăm select-ul */
+select {
+    padding: 10px;
+    border-radius: 5px;
+}
+
+/* Stilizăm butonul de ștergere */
+.delete-button {
+    background-color: #f44336; /* Red */
+    border: none;
+    color: white;
+    padding: 5px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 14px;
+    margin: 2px 0;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+/* Efecte la hover pentru butonul de ștergere */
+.delete-button:hover {
+    background-color: #cc0000;
+}
