@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculator Dobândă Întârziere</title>
-    <script type="text/javascript" src="https://gc.kis.v2.scr.kaspersky-labs.com/FD126C42-EBFA-4E12-B309-BB3FDD723AC1/main.js?attr=x0ZaQ2AW-hJo-PODSg4-_Nf4qF69bGnh269kRvexgCoyfBZ1d-JZVHToYdADReZLq8JRlCaxz4aqb1xHkJKzbgUz6MShR1HfGs_WZW5TbRk" charset="UTF-8"></script><style>
+    <style>
         label, input, select, button {
             display: block;
             margin-bottom: 10px;
@@ -61,6 +61,16 @@
 
         <button onclick="adaugaPlata()">Adaugă Plata</button>
 
+        <h3>Setări Calcul</h3>
+        <label for="dataCalcul">Data Efectuării Calculului:</label>
+        <input type="date" id="dataCalcul">
+
+        <label for="startGratie">Început Perioada de Grație:</label>
+        <input type="date" id="startGratie">
+        
+        <label for="endGratie">Sfârșit Perioada de Grație:</label>
+        <input type="date" id="endGratie">
+
         <label for="stareUrgenta">Exclud perioadele de stare de urgență:</label>
         <input type="checkbox" id="stareUrgenta">
 
@@ -100,6 +110,7 @@
                 <th>Acțiuni</th>
             </tr>
         </table>
+        <div id="totalAchitari">Total Achitări: 0</div>
     </div>
 
     <div id="rezultatDobanzi"></div>
@@ -242,6 +253,7 @@
 
             plati.push({ suma: sumaAchitata, data: dataAchitarii });
             actualizeazaTabel(plati, 'platiTable');
+            actualizeazaTotalAchitari();
         }
 
         function actualizeazaTabel(lista, tabelId) {
@@ -264,12 +276,20 @@
                 butonSterge.onclick = () => {
                     lista.splice(index, 1);
                     actualizeazaTabel(lista, tabelId);
+                    if (tabelId === 'platiTable') {
+                        actualizeazaTotalAchitari();
+                    }
                 };
                 cellActiuni.appendChild(butonSterge);
                 rand.appendChild(cellActiuni);
 
                 tabel.appendChild(rand);
             });
+        }
+
+        function actualizeazaTotalAchitari() {
+            const totalAchitari = plati.reduce((total, plata) => total + plata.suma, 0);
+            document.getElementById('totalAchitari').textContent = `Total Achitări: ${totalAchitari.toFixed(2)}`;
         }
 
         function gasesteRata(data) {
@@ -283,11 +303,15 @@
 
         function esteStareUrgenta(data) {
             const perioadeStareUrgenta = [
-            { start: new Date('2020-03-15'), end: new Date('2020-05-15') },
-            { start: new Date('2021-04-01'), end: new Date('2021-05-30') }
+                { start: new Date('2020-03-15'), end: new Date('2020-05-15') },
+                { start: new Date('2021-04-01'), end: new Date('2021-05-30') }
             ];
 
             return perioadeStareUrgenta.some(period => data >= period.start && data <= period.end);
+        }
+
+        function estePerioadaDeGratie(data, startGratie, endGratie) {
+            return startGratie && endGratie && data >= startGratie && data <= endGratie;
         }
 
         function calculeazaDobanda() {
@@ -295,7 +319,9 @@
             const stareUrgentaExclusa = document.getElementById('stareUrgenta').checked;
             const valuta = document.getElementById('valuta').value;
 
-            const dataCurenta = new Date();
+            const dataCalcul = document.getElementById('dataCalcul').value ? new Date(document.getElementById('dataCalcul').value) : new Date();
+            const startGratie = document.getElementById('startGratie').value ? new Date(document.getElementById('startGratie').value) : null;
+            const endGratie = document.getElementById('endGratie').value ? new Date(document.getElementById('endGratie').value) : null;
 
             let dobandaTotala = 0;
             let dobandaPeRata = {};
@@ -314,16 +340,16 @@
                 let sumaRestanta = sumaDatorata;
 
                 for (let i = 0; i <= platiFiltrate.length; i++) {
-                    const dataSfarsit = i < platiFiltrate.length ? platiFiltrate[i].data : dataCurenta;
+                    const dataSfarsit = i < platiFiltrate.length ? platiFiltrate[i].data : dataCalcul;
                     const plataCurenta = i < platiFiltrate.length ? platiFiltrate[i].suma : 0;
 
                     let numarZile = 0;
                     while (dataStart <= dataSfarsit) {
-                        numarZile++;
-                        const rata = gasesteRata(dataStart);
-                        const dobandaZilnica = sumaRestanta * ((rata + rataIntarziere) / 100) / 365;
+                        if (!stareUrgentaExclusa || (!esteStareUrgenta(dataStart) && !estePerioadaDeGratie(dataStart, startGratie, endGratie))) {
+                            numarZile++;
+                            const rata = gasesteRata(dataStart);
+                            const dobandaZilnica = sumaRestanta * ((rata + rataIntarziere) / 100) / 365;
 
-                        if (!stareUrgentaExclusa || !esteStareUrgenta(dataStart)) {
                             dobandaTotala += dobandaZilnica;
                             if (!dobandaPeRata[rata]) {
                                 dobandaPeRata[rata] = 0;
@@ -336,7 +362,7 @@
                                 sumaScadenta: sumaDatorata.toFixed(2),
                                 sumeAchitate: plataCurenta.toFixed(2),
                                 restanta: sumaRestanta.toFixed(2),
-                                rata: rata+rataIntarziere,
+                                rata: rata + rataIntarziere,
                                 dobandaZilnica: dobandaZilnica.toFixed(2),
                                 totalDobanda: dobandaTotala.toFixed(2)
                             });
@@ -397,7 +423,6 @@
             nouaFereastra.document.write(totaluriPerRataHtml);
             nouaFereastra.document.write('</body></html>');
         }
-
     </script>
 </body>
 </html>
