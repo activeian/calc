@@ -11,6 +11,16 @@
             display: block;
             margin-bottom: 10px;
         }
+        #menu {
+            background-color: #f2f2f2;
+            padding: 10px;
+            margin-bottom: 20px;
+        }
+        #menu a {
+            margin-right: 15px;
+            text-decoration: none;
+            color: #333;
+        }
         #inputSection {
             float: left;
             width: 45%;
@@ -41,6 +51,12 @@
     </style>
 </head>
 <body>
+    <div id="menu">
+        <a href="#home">Acasă</a>
+        <a href="#calc">Calculator</a>
+        <a href="#info">Informații</a>
+        <a href="#contact">Contact</a>
+    </div>
     
     <div id="inputSection">
         <h2>Calculator Dobândă Întârziere</h2>
@@ -89,6 +105,9 @@
             <option value="5">5%</option>
             <option value="9">9%</option>
         </select>
+
+        <label for="detaliat">Afișează rezultat detaliat:</label>
+        <input type="checkbox" id="detaliat">
 
         <button onclick="calculeazaDobanda()">Calculează Dobânda</button>
     </div>
@@ -235,7 +254,6 @@
             { data: new Date('2000-10-27'), rata: 39 },
             { data: new Date('2000-08-25'), rata: 40 },
         ];
-
         let datorii = [];
         let plati = [];
 
@@ -303,11 +321,11 @@
 
         function esteStareUrgenta(data) {
             const perioadeStareUrgenta = [
-                { start: new Date('2020-03-15'), end: new Date('2020-05-15') },
+            { start: new Date('2020-03-15'), end: new Date('2020-05-15') },
                 { start: new Date('2021-04-01'), end: new Date('2021-05-30') }
             ];
 
-            return perioadeStareUrgenta.some(period => data >= period.start && data <= period.end);
+            return perioadeStareUrgenta.some(interval => data >= interval.start && data <= interval.end);
         }
 
         function estePerioadaDeGratie(data, startGratie, endGratie) {
@@ -318,6 +336,7 @@
             const rataIntarziere = parseFloat(document.getElementById('rataIntarziere').value);
             const stareUrgentaExclusa = document.getElementById('stareUrgenta').checked;
             const valuta = document.getElementById('valuta').value;
+            const afisareDetaliata = document.getElementById('detaliat').checked;
 
             const dataCalcul = document.getElementById('dataCalcul').value ? new Date(document.getElementById('dataCalcul').value) : new Date();
             const startGratie = document.getElementById('startGratie').value ? new Date(document.getElementById('startGratie').value) : null;
@@ -380,10 +399,10 @@
                 }
             });
 
-            afiseazaRezultate(rezultateDetaliate, dobandaTotala, dobandaPeRata, totalZile, totalSumeAchitate, totalRestanta, valuta);
+            afiseazaRezultate(rezultateDetaliate, dobandaTotala, dobandaPeRata, totalZile, totalSumeAchitate, totalRestanta, valuta, afisareDetaliata);
         }
 
-        function afiseazaRezultate(rezultateDetaliate, dobandaTotala, dobandaPeRata, totalZile, totalSumeAchitate, totalRestanta, valuta) {
+        function afiseazaRezultate(rezultateDetaliate, dobandaTotala, dobandaPeRata, totalZile, totalSumeAchitate, totalRestanta, valuta, afisareDetaliata) {
             let totaluriPerRataHtml = '<h4>Totaluri per rata:</h4><ul>';
             for (const rata in dobandaPeRata) {
                 totaluriPerRataHtml += `<li>Rata ${rata}%: ${dobandaPeRata[rata].toFixed(2)}</li>`;
@@ -397,7 +416,12 @@
             nouaFereastra.document.write('<p>în temeiul art. 942 alin.2 din CC RM</p>');
             nouaFereastra.document.write('<table border="1"><tr><th>Zi</th><th>Data</th><th>Suma Scadentă</th><th>Sume Achitate</th><th>Restanța</th><th>Rata de Bază %</th><th>Dobânda Zilnică</th></tr>');
             
-            rezultateDetaliate.forEach(rezultat => {
+            let rezultateAfisate = rezultateDetaliate;
+            if (!afisareDetaliata) {
+                rezultateAfisate = rezultateDetaliate.slice(0, 10);
+            }
+
+            rezultateAfisate.forEach(rezultat => {
                 nouaFereastra.document.write('<tr>');
                 nouaFereastra.document.write(`<td>${rezultat.zi}</td>`);
                 nouaFereastra.document.write(`<td>${rezultat.data.toISOString().split('T')[0]}</td>`);
