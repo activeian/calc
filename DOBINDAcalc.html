@@ -21,13 +21,12 @@
             text-decoration: none;
             color: #333;
         }
-        #inputSection {
-            float: left;
-            width: 45%;
+        #container {
+            display: flex;
+            justify-content: space-between;
         }
-        #outputSection {
-            float: right;
-            width: 45%;
+        #inputSection, #middleSection, #outputSection {
+            width: 30%;
         }
         table {
             border-collapse: collapse;
@@ -57,79 +56,83 @@
         <a href="#info">Informații</a>
         <a href="#contact">Contact</a>
     </div>
-    
-    <div id="inputSection">
-        <h2>Calculator Dobândă Întârziere</h2>
-        <label for="sumaDatorata">Suma Datorată:</label>
-        <input type="number" id="sumaDatorata">
 
-        <label for="dataScadenta">Data Scadenței:</label>
-        <input type="date" id="dataScadenta">
+    <div id="container">
+        <div id="inputSection">
+            <h2>Calculator Dobândă Întârziere</h2>
+            <label for="sumaDatorata">Suma Datorată:</label>
+            <input type="number" id="sumaDatorata">
 
-        <button onclick="adaugaDatorie()">Adaugă Datorie</button>
+            <label for="dataScadenta">Data Scadenței:</label>
+            <input type="date" id="dataScadenta">
 
-        <h3>Adaugă Plată</h3>
-        <label for="sumaAchitata">Suma Achitată:</label>
-        <input type="number" id="sumaAchitata">
+            <button onclick="adaugaDatorie()">Adaugă Datorie</button>
 
-        <label for="dataAchitarii">Data Achitării:</label>
-        <input type="date" id="dataAchitarii">
+            <h3>Adaugă Plată</h3>
+            <label for="sumaAchitata">Suma Achitată:</label>
+            <input type="number" id="sumaAchitata">
 
-        <button onclick="adaugaPlata()">Adaugă Plata</button>
+            <label for="dataAchitarii">Data Achitării:</label>
+            <input type="date" id="dataAchitarii">
 
-        <h3>Setări Calcul</h3>
-        <label for="dataCalcul">Data Efectuării Calculului:</label>
-        <input type="date" id="dataCalcul">
+            <button onclick="adaugaPlata()">Adaugă Plata</button>
+        </div>
 
-        <label for="startGratie">Început Perioada de Grație:</label>
-        <input type="date" id="startGratie">
-        
-        <label for="endGratie">Sfârșit Perioada de Grație:</label>
-        <input type="date" id="endGratie">
+        <div id="middleSection">
+            <h3>Setări Calcul</h3>
+            <label for="dataCalcul">Data Efectuării Calculului:</label>
+            <input type="date" id="dataCalcul">
 
-        <label for="stareUrgenta">Exclud perioadele de stare de urgență:</label>
-        <input type="checkbox" id="stareUrgenta">
+            <label for="startGratie">Început Perioada de Grație:</label>
+            <input type="date" id="startGratie">
+            
+            <label for="endGratie">Sfârșit Perioada de Grație:</label>
+            <input type="date" id="endGratie">
 
-        <label for="valuta">Valuta:</label>
-        <select id="valuta">
-            <option value="MDL">MDL</option>
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
-            <option value="UAH">UAH</option>
-            <option value="RUB">RUB</option>
-        </select>
+            <label for="stareUrgenta">Exclud perioadele de stare de urgență:</label>
+            <input type="checkbox" id="stareUrgenta">
 
-        <label for="rataIntarziere">Rata de întârziere peste rata de bază:</label>
-        <select id="rataIntarziere">
-            <option value="0">0%</option>
-            <option value="5">5%</option>
-            <option value="9">9%</option>
-        </select>
+            <label for="valuta">Valuta:</label>
+            <select id="valuta">
+                <option value="MDL">MDL</option>
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="UAH">UAH</option>
+                <option value="RUB">RUB</option>
+            </select>
 
-        <label for="detaliat">Afișează rezultat detaliat:</label>
-        <input type="checkbox" id="detaliat">
+            <label for="rataIntarziere">Rata de întârziere peste rata de bază:</label>
+            <select id="rataIntarziere">
+                <option value="0">0%</option>
+                <option value="5">5%</option>
+                <option value="9">9%</option>
+            </select>
 
-        <button onclick="calculeazaDobanda()">Calculează Dobânda</button>
-    </div>
+            <label for="detaliat">Afișează rezultat detaliat:</label>
+            <input type="checkbox" id="detaliat">
 
-    <div id="outputSection">
-        <h3>Datorii:</h3>
-        <table id="datoriiTable">
-            <tr>
-                <th>Suma</th>
-                <th>Data Scadenței</th>
-                <th>Acțiuni</th>
-            </tr>
-        </table>
-        <h3>Plăți:</h3>
-        <table id="platiTable">
-            <tr>
-                <th>Suma</th>
-                <th>Data Achitării</th>
-                <th>Acțiuni</th>
-            </tr>
-        </table>
-        <div id="totalAchitari">Total Achitări: 0</div>
+            <button onclick="calculeazaDobanda()">Calculează Dobânda</button>
+        </div>
+
+        <div id="outputSection">
+            <h3>Datorii:</h3>
+            <table id="datoriiTable">
+                <tr>
+                    <th>Suma</th>
+                    <th>Data Scadenței</th>
+                    <th>Acțiuni</th>
+                </tr>
+            </table>
+            <h3>Plăți:</h3>
+            <table id="platiTable">
+                <tr>
+                    <th>Suma</th>
+                    <th>Data Achitării</th>
+                    <th>Acțiuni</th>
+                </tr>
+            </table>
+            <div id="totalAchitari">Total Achitări: 0</div>
+        </div>
     </div>
 
     <div id="rezultatDobanzi"></div>
